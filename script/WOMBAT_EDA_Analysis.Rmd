@@ -1,0 +1,81 @@
+
+---
+title: "EDA of WOMBAT-P Proteomics Data"
+output: html_document
+author: Ehsan Zangene
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+## 📦 Load Required Libraries
+
+```{r}
+rm(list = ls())
+
+library(jsonlite)
+library(readr)
+library(purrr)
+library(tibble)
+```
+
+## 📁 Define Data Directory and Read Files
+
+```{r}
+data_dir <- "../../WOMBAT-P_Processed/ProteoBenchDDA/0.9.11/"
+
+# List all files
+all_files <- list.files(data_dir, full.names = TRUE)
+
+# Split by type
+csv_files <- all_files[grepl("\\.(csv)$", all_files)]
+json_files <- all_files[grepl("\\.(json)$", all_files)]
+
+# Read files
+csv_data <- setNames(lapply(csv_files, read_csv), basename(csv_files))
+json_data <- setNames(lapply(json_files, fromJSON), basename(json_files))
+```
+
+## 🧾 Function to Print Metadata
+
+```{r}
+print_metadata <- function(data_list, type = "CSV") {
+  cat("\n===== Metadata for", type, "files =====\n")
+  for (name in names(data_list)) {
+    cat("\n---", name, "---\n")
+    df <- data_list[[name]]
+    if (is.data.frame(df)) {
+      cat("Dimensions:", paste(dim(df), collapse = " x "), "\n")
+      cat("Column names:", paste(colnames(df), collapse = ", "), "\n")
+      cat("First few row names / IDs:", paste(rownames(df)[1:min(5, nrow(df))], collapse = ", "), "\n")
+    } else {
+      cat("Not a data frame. Type:", class(df), "\n")
+      cat("length is: ", length(df), "\n")
+      cat("including: ", names(df), "\n")
+    }
+  }
+}
+```
+
+## 📄 Print Metadata
+
+```{r}
+print_metadata(csv_data, "CSV")
+print_metadata(json_data, "JSON")
+```
+
+## 📊 Sample Exploratory Plots from CSV (if applicable)
+
+```{r}
+if (length(csv_data) > 0) {
+  sample_df <- csv_data[[1]]
+  if (is.data.frame(sample_df)) {
+    summary(sample_df)
+    hist_df <- sample_df[, sapply(sample_df, is.numeric)]
+    if (ncol(hist_df) > 0) {
+      hist(hist_df[[1]], main = "Histogram of first numeric column", xlab = names(hist_df)[1])
+    }
+  }
+}
+```

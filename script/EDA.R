@@ -4,6 +4,7 @@ rm(list = ls())
 library(jsonlite)
 library(readr)
 library(purrr)
+library(tibble)
 
 # Set your working directory to the cloned folder
 data_dir <- "../WOMBAT-P_Processed/ProteoBenchDDA/0.9.11/"

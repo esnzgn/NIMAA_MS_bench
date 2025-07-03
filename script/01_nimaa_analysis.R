@@ -59,6 +59,7 @@ nimaa_long_inputs <- map(nimaa_inputs, function(df) {
   # Select numeric abundance columns
   abund_cols <- grep("^abundance_", colnames(df), value = TRUE)
 
+
   # Normalize across all samples (global Z-score per row)
   df_norm <- df %>%
     mutate(across(all_of(abund_cols), z_score)) %>%
