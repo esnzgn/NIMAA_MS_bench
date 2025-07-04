@@ -18,6 +18,8 @@ library(jsonlite)
 library(readr)
 library(purrr)
 library(tibble)
+library(tidyverse)
+library(ggplot2)
 ```
 
 ## 📁 Define Data Directory and Read Files
@@ -60,22 +62,89 @@ print_metadata <- function(data_list, type = "CSV") {
 
 ## 📄 Print Metadata
 
+
 ```{r}
-print_metadata(csv_data, "CSV")
-print_metadata(json_data, "JSON")
+csv_data_log <- csv_data$stand_ion_quant_mergedcompomics.csv %>%
+  mutate(across(starts_with("abundance_"), ~log2(.x + 1)))  # add 1 to avoid log(0)
+
+csv_data_log %>% 
+  select(starts_with("abundance_")) %>% 
+summary()
 ```
+```{r}
+tibble(csv_data$stand_ion_quant_mergedcompomics.csv) %>% 
+  select(starts_with("abundance_")) %>% 
+  summary()
+
+```
+
+```{r}
+# Pivot to long format
+for (i in (grep("stand_pep_quant",names(csv_data)))){
+  tmptbl = NULL
+  df_long = NULL
+  # head(tibble(csv_data[[i]]))
+  tmptbl <- csv_data[[i]]
+  
+  df_long <- tmptbl %>%
+  pivot_longer(
+    cols = starts_with("abundance_"),
+    names_to = "sample",
+    values_to = "abundance"
+  )  
+
+  p1 <- ggplot(data = df_long, aes(x = sample, y = abundance, fill = sample)) +
+      geom_boxplot(alpha = .7) +
+    # coord_flip() +
+    theme_minimal() +
+    theme(axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          legend.position = "none")
+  
+  # 
+  # df_long <- df_long %>% 
+  #   mutate(across("abundance", ~log2(.x + 1)))
+
+  p2 <- ggplot(data = df_long, aes(x = sample, y = log2(abundance + 1), fill = sample)) +
+      geom_boxplot(alpha = .7) +
+    # coord_flip() +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1),
+          legend.position = "none")
+
+  # legend <- cowplot::get_legend(p1)
+  # p1 <- p1 + theme(legened.position = "none")
+  p <- cowplot::plot_grid(p1, p2, ncol = 1, labels = gsub("stand_pep_quant_","",names(csv_data[i])))
+    print(p)
+}
+# 
+# 
+# csv_data_log %>%
+#   pivot_longer(cols = starts_with("abundance_"), names_to = "sample", values_to = "log2_abundance") %>%
+#   ggplot(aes(x = sample, y = log2_abundance)) +
+#   geom_boxplot(outlier.shape = NA) +
+#   coord_flip() +
+#   theme_minimal()
+# 
+# 
+# print_metadata(csv_data, "CSV")
+# print_metadata(json_data, "JSON")
+```
+# question: why some peps have no psm mapped but on the other hand there some abundance values (to ve asked form fight)
+## e.g. P07259 in maxquant pep csv psm vs abundance
+!["quesiotn for fight"](../image/qustions_raised_fight.jpg)
 
 ## 📊 Sample Exploratory Plots from CSV (if applicable)
 
 ```{r}
-if (length(csv_data) > 0) {
-  sample_df <- csv_data[[1]]
-  if (is.data.frame(sample_df)) {
-    summary(sample_df)
-    hist_df <- sample_df[, sapply(sample_df, is.numeric)]
-    if (ncol(hist_df) > 0) {
-      hist(hist_df[[1]], main = "Histogram of first numeric column", xlab = names(hist_df)[1])
-    }
-  }
-}
+# if (length(csv_data) > 0) {
+#   sample_df <- csv_data[[1]]
+#   if (is.data.frame(sample_df)) {
+#     summary(sample_df)
+#     hist_df <- sample_df[, sapply(sample_df, is.numeric)]
+#     if (ncol(hist_df) > 0) {
+#       hist(hist_df[[1]], main = "Histogram of first numeric column", xlab = names(hist_df)[1])
+#     }
+#   }
+# }
 ```
