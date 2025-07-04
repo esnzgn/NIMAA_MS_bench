@@ -136,7 +136,38 @@ for (i in (grep("stand_pep_quant",names(csv_data)))){
 
 ## 📊 Sample Exploratory Plots from CSV (if applicable)
 
-```{r}
+```{r df_4_NIMAA func def}
+# to use this func first we need an additonal func to let the user chose the column for rownames and columns that need to stay as the cols
+# and also rm the duplicated var chosen for rownames with some logic (least NA including)
+df_4_NIMAA <- function(not_ready_df, column_to_row, pattern_to_columns){
+  # pattern_to_columns <- c("abundance_A", "abundance_B")
+  # not_ready_df <- csv_data[[i]]
+  # not_ready_df <- csv_data[["stand_pep_quant_mergedcompomics.csv"]]
+  # row_id <- grepl("peptide", colnames(csv_data[["stand_pep_quant_mergedcompomics.csv"]]))
+  # cols_ids <- grepl("abundance", colnames(csv_data[["stand_pep_quant_mergedcompomics.csv"]]))
+  row_id <- grepl(column_to_row, colnames(not_ready_df))
+  # head(csv_data["stand_pep_quant_mergedcompomics.csv"])
+  
+  ids_rm <- grep(("differential_"), colnames(not_ready_df))
+  not_ready_df <- not_ready_df[,-c(ids_rm)]
+  if (length(pattern_to_columns)>1){
+    cols_ids = NULL
+    for (ij in 1:length(pattern_to_columns)){
+      cols_ids <- c(cols_ids, grep(pattern_to_columns[ij], colnames(not_ready_df)))
+    }
+    new_df <- not_ready_df[,cols_ids]    
+  } else {
+    new_df <- not_ready_df[,cols_ids]  
+  }
+  
+  row_names <- not_ready_df[,which(row_id)]
+  id_nna <- which(!is.na(row_names))
+  row_names <- row_names[!is.na(row_names)]
+  
+  new_df <- new_df[id_nna, ]
+  rownames(new_df) <- row_names
+  return(as.data.frame(new_df))
+}
 # if (length(csv_data) > 0) {
 #   sample_df <- csv_data[[1]]
 #   if (is.data.frame(sample_df)) {
@@ -148,3 +179,60 @@ for (i in (grep("stand_pep_quant",names(csv_data)))){
 #   }
 # }
 ```
+
+## NIMAA analysis on NA's of WomBat datasets
+!["NIMAA workflow"](../image/NIMAA_GA.jpg)
+
+```{r NIMAA}
+library(NIMAA)
+
+# nominalAsBinet()
+
+# beatAML is a long format dataset existing NIMAA
+# beatAML_data <- NIMAA::beatAML[1:1000,]
+
+# convert to incidence matrix or actually the wide format of real data
+# beatAML_incidence_matrix <- nominalAsBinet(beatAML_data)
+
+# extract submatrices with non-missing values
+# sub_matrices <- extractSubMatrix(beatAML_incidence_matrix, col.vars = "patient_id",
+#  row.vars = "inhibitor")
+for (i in (grep("stand_pep_quant",names(csv_data)))){
+  tmptbl = NULL
+  df_long = NULL
+  # head(tibble(csv_data[[i]]))
+  rm(nm)
+  nm <- names(csv_data[i])
+  tmptbl <- csv_data[[i]]
+  cat("dataset name: ", nm, " ----- dim: ", dim(tmptbl), " \n")
+  # print(colnames(tmptbl))
+  read4_nimaa <- df_4_NIMAA(tmptbl,"peptide", c("abundance_A", "abundance_B")) 
+  print(head(read4_nimaa))
+  cat("--------> done: ", nm, paste(rep("-------",3), collapse = ""), "\n")
+}
+
+seqq = (grep("stand_pep_quant",names(csv_data)))
+subMat_bench = NULL
+for (i in seqq){
+  tmptbl = NULL
+  df_long = NULL
+  # head(tibble(csv_data[[i]]))
+  rm(nm)
+  nm <- names(csv_data[i])
+  tmptbl <- csv_data[[i]]
+  
+  not_ready_df <- tmptbl
+  read4_nimaa <- df_4_NIMAA(not_ready_df,"peptide", c("abundance_A", "abundance_B")) 
+  
+  subMat <- NULL
+  # extract submatrices with non-missing values
+  
+  cat("--------> dataset name: ", nm, "-------> iteration: ", i, "\n")
+  subMat <- extractSubMatrix(read4_nimaa, col.vars = "samples", row.vars = "peptide")
+  
+  cat("--------> done: ", nm, paste(rep("-------",3), collapse = ""), "\n")
+
+  # subMat_bench[[nm]] <- sub_matrices
+}
+```
+
