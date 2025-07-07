@@ -182,8 +182,7 @@ for (i in seqq){
   tmptbl <- csv_data[[i]]
   cat("dataset name: ", nm, " ----- dim: ", dim(tmptbl), " \n")
   # print(colnames(tmptbl))
-  read4_nimaa <- df_4_NIMAA(tmptbl, column_to_row = "protein_group", if_protein = T, pattern_to_columns = c("peptides_A", "peptides_B"),
-                            No_rows = 1000) 
+  read4_nimaa <- df_4_NIMAA(tmptbl, column_to_row = "protein_group", if_protein = T, pattern_to_columns = c("peptides_A", "peptides_B")) 
   print(class(read4_nimaa))
   print(dim(read4_nimaa))
   print(head(read4_nimaa))
@@ -200,16 +199,31 @@ for (i in seqq){
   nm <- names(csv_data[i])
   tmptbl <- csv_data[[i]]
   
-  not_ready_df <- tmptbl
   # read4_nimaa <- df_4_NIMAA(not_ready_df,"peptide", c("abundance_A", "abundance_B"))
-  read4_nimaa <- df_4_NIMAA(tmptbl, column_to_row = "protein_group", if_protein = T, pattern_to_columns = c("peptides_A", "peptides_B"),
-                            No_rows = 500)
-  
+  read4_nimaa <- df_4_NIMAA(tmptbl, "protein_group", T, c("peptides_A", "peptides_B"))
+  cat("------------->>>>>>>>>>>>.  ",class(read4_nimaa))
   subMat <- NULL
   # extract submatrices with non-missing values
   cat("--------> dataset name: ", nm, "-------> iteration: ", i, "\n")
-  subMat <- extractSubMatrix(read4_nimaa, col.vars = "samples", row.vars = "peptide")
+  matrixxx <- as.matrix(read4_nimaa[1:500, ])
+  rownames(matrixxx) <- 1:500
+  colnames(matrixxx) <- 1:6
+  subMat <- extractSubMatrix(matrixxx, col.vars = "samples", row.vars = "peptides")
+  
+  # load part of the beatAML data
+beatAML_data <- NIMAA::beatAML[1:10000,]
+
+# convert to incidence matrix
+beatAML_incidence_matrix <- nominalAsBinet(beatAML_data)
+
+# extract submatrices with non-missing values
+sub_matrices <- extractSubMatrix(beatAML_incidence_matrix, col.vars = "patient_id",
+ row.vars = "inhibitor")
+
   subMat_bench[[nm]] <- subMat
+
+  sub_matrices_beat <- extractSubMatrix(beatAML_incidence_matrix, col.vars = "inhibitor",
+ row.vars = "patient_id")
   
   cat("--------> done: ", nm, paste(rep("-------",3), collapse = ""), "\n")
 }

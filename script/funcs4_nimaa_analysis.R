@@ -1,4 +1,4 @@
-df_4_NIMAA <- function(not_ready_df, column_to_row, if_protein = TRUE, pattern_to_columns, No_rows = 1000){
+df_4_NIMAA <- function(not_ready_df, column_to_row, if_protein = TRUE, pattern_to_columns){
   # df_4_NIMAA(tmptbl, column_to_row = "protein_group", if_protein = T, pattern_to_columns = c("peptides_A", "peptides_B"))
   # df_4_NIMAA(tmptbl, column_to_row = "peptide", pattern_to_columns = c("abundance_A", "abundance_B"))
   # pattern_to_columns <- c("abundance_A", "abundance_B")
@@ -7,7 +7,7 @@ df_4_NIMAA <- function(not_ready_df, column_to_row, if_protein = TRUE, pattern_t
   # not_ready_df <- csv_data[["stand_pep_quant_mergedcompomics.csv"]]
   # row_id <- grepl("peptide", colnames(csv_data[["stand_pep_quant_mergedcompomics.csv"]]))
   # cols_ids <- grepl("abundance", colnames(csv_data[["stand_pep_quant_mergedcompomics.csv"]]))
-  not_ready_df <- not_ready_df[1:No_rows,]
+  # not_ready_df <- not_ready_df[c(1:No_rows),]
   row_id <- grepl(column_to_row, colnames(not_ready_df))
 
   if (isTRUE(if_protein)){
@@ -43,7 +43,73 @@ df_4_NIMAA <- function(not_ready_df, column_to_row, if_protein = TRUE, pattern_t
 
   row_names <- row_names[[1]][id_good]
 
-  new_df <- as.data.frame(new_df[id_good, ])
+  new_df <- as.matrix(new_df[id_good, ])
   rownames(new_df) <- row_names
   return(new_df)
 }
+
+sizePortion <- function(input){
+  cat("No of Rows: ", nrow(input), ",No of Cols: ",ncol(input), "\n", "nrow/ncol portion: ",
+      round(digits = 2, nrow(input)/ncol(input)*100),"%")
+  # return(nrow(input)/ncol(input))
+}
+
+# ### ** Examples
+#
+# # load part of the beatAML data
+# beatAML_data <- NIMAA::beatAML[1:10000,]
+#
+# # convert to incidence matrix
+# beatAML_incidence_matrix <- nominalAsBinet(beatAML_data)
+#
+# # extract submatrices with non-missing values
+# sub_matrices <- extractSubMatrix(beatAML_incidence_matrix, col.vars = "patient_id",
+#                                  row.vars = "inhibitor")
+
+
+
+# read4_nimaa <- df_4_NIMAA(not_ready_df,"peptide", c("abundance_A", "abundance_B"))
+read4_nimaa <- df_4_NIMAA(tmptbl, "protein_group", T, c("peptides_A", "peptides_B"))
+cat("------------->>>>>>>>>>>>.  ",class(read4_nimaa))
+subMat <- NULL
+# extract submatrices with non-missing values
+cat("--------> dataset name: ", nm, "-------> iteration: ", i, "\n")
+matrixxx <- (read4_nimaa[1:1000, ])
+sizePortion(t(matrixxx))
+# rownames(matrixxx) <- NULL
+# colnames(matrixxx) <- NULL
+subMat <- extractSubMatrix(matrixxx, col.vars = "samples", row.vars = "protein")
+
+extractSubMatrix(matrixxx, col.vars = NULL, row.vars = NULL)
+
+rownames(matrixxx) <- rownames(read4_nimaa)[1:100]
+
+# Call the function without meaningless labels
+extractSubMatrix(matrixxx, col.vars = NULL, row.vars = NULL)
+
+# x_after_arrange <- NIMAA::threeStepArrange(matrixxx)
+# findSquareCutoffSubmatrix(x_after_arrange)
+
+
+
+# load part of the beatAML data
+beatAML_data <- NIMAA::beatAML[1:794,]
+# No of Rows:  10 ,No of Cols:  87
+# nrow/ncol portion:  11.49 %
+
+beatAML_data <- NIMAA::beatAML[1:795,]
+
+beatAML_data <- NIMAA::beatAML[1:10000,]
+# No of Rows:  11 ,No of Cols:  87
+# nrow/ncol portion:  12.64 %
+
+# convert to incidence matrix
+beatAML_incidence_matrix <- nominalAsBinet(beatAML_data)
+
+sizePortion(beatAML_incidence_matrix)
+
+# extract submatrices with non-missing values
+sub_matrices <- extractSubMatrix(beatAML_incidence_matrix, col.vars = "patient_id",
+                                 row.vars = "inhibitor")
+
+
