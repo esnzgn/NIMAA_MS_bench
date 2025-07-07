@@ -119,4 +119,11 @@ sub_matrices <- extractSubMatrix(beatAML_incidence_matrix, col.vars = "patient_i
 
 beatAML_data <- NIMAA::beatAML[1:795,]
 
-beatAML_data <- NIMAA::beatAML[1:10000,]
+beatAML_incidence_matrix <- nominalAsBinet(beatAML_data)
+
+sizePortion(beatAML_incidence_matrix)
+
+# extract submatrices with non-missing values
+# in following line the error is goning to be generated for the above size of the input dataset
+sub_matrices <- extractSubMatrix(beatAML_incidence_matrix, col.vars = "patient_id",
+                                 row.vars = "inhibitor")
