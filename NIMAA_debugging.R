@@ -6,7 +6,7 @@ cat("------------->>>>>>>>>>>>.  ",class(read4_nimaa))
 subMat <- NULL
 # extract submatrices with non-missing values
 cat("--------> dataset name: ", nm, "-------> iteration: ", i, "\n")
-matrixxx <- (read4_nimaa[1:1000, ])
+matrixxx <- (read4_nimaa[1:100, ])
 sizePortion(t(matrixxx))
 # rownames(matrixxx) <- NULL
 # colnames(matrixxx) <- NULL
