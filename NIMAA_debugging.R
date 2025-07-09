@@ -6,11 +6,12 @@ cat("------------->>>>>>>>>>>>.  ",class(read4_nimaa))
 subMat <- NULL
 # extract submatrices with non-missing values
 cat("--------> dataset name: ", nm, "-------> iteration: ", i, "\n")
-matrixxx <- (read4_nimaa[1:100, ])
+matrixxx <- read4_nimaa
+
 sizePortion(t(matrixxx))
 # rownames(matrixxx) <- NULL
 # colnames(matrixxx) <- NULL
-subMat <- extractSubMatrix(matrixxx, col.vars = "samples", row.vars = "protein")
+subMat <- extractSubMatrix(matrixxx, shape = "Rectangular_row", col.vars = "samples", row.vars = "protein")
 
 extractSubMatrix(matrixxx, col.vars = NULL, row.vars = NULL)
 
@@ -59,3 +60,5 @@ sizePortion(beatAML_incidence_matrix)
 # in following line the error is goning to be generated for the above size of the input dataset
 sub_matrices <- extractSubMatrix(beatAML_incidence_matrix, col.vars = "patient_id",
                                  row.vars = "inhibitor")
+
+

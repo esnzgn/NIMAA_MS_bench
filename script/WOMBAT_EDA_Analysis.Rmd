@@ -64,7 +64,7 @@ print_metadata <- function(data_list, type = "CSV") {
 
 
 ```{r}
-csv_data_log <- csv_data$stand_ion_quant_mergedcompomics.csv %>%
+csv_data_log <- csv_data$stand_pep_quant_mergedcompomics.csv %>%
   mutate(across(starts_with("abundance_"), ~log2(.x + 1)))  # add 1 to avoid log(0)
 
 csv_data_log %>% 
@@ -170,7 +170,7 @@ library(NIMAA)
 # extract submatrices with non-missing values
 # sub_matrices <- extractSubMatrix(beatAML_incidence_matrix, col.vars = "patient_id",
 #  row.vars = "inhibitor")
-seqq = (grep("stand_prot_quant",names(csv_data)))
+seqq = (grep("stand_pep_quant_",names(csv_data)))
 
 for (i in seqq){
   print(i)
