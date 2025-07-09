@@ -145,20 +145,22 @@ colnames()
 subMat = NULL
 
 # Set up the cluster
-n_cores <- 8
-cl <- makeCluster(n_cores)
+# n_cores <- 8
+# cl <- makeCluster(n_cores)
+#
+# # Manually define the path INSIDE the cluster
+# # clusterEvalQ(cl, {
+# #   user_lib <- file.path(Sys.getenv("HOME"), "R", "x86_64-pc-linux-gnu-library", paste0(R.version$major, ".", R.version$minor))
+# #   .libPaths(c(user_lib, .libPaths()))
+# # })
+#
+# # Register the parallel backend
+# registerDoParallel(cl)
 
-# Manually define the path INSIDE the cluster
-# clusterEvalQ(cl, {
-#   user_lib <- file.path(Sys.getenv("HOME"), "R", "x86_64-pc-linux-gnu-library", paste0(R.version$major, ".", R.version$minor))
-#   .libPaths(c(user_lib, .libPaths()))
-# })
-
-# Register the parallel backend
-registerDoParallel(cl)
-
-subMat <- foreach(i = seqq, .packages = c("tidyverse", "NIMAA")) %dopar% {
+# subMat <- foreach(i = seqq, .packages = c("tidyverse", "NIMAA")) %dopar% {
+for(i in seqq){
   nm <- names(csv_data[i])
+  cat("---------------->>  prot csv file: ", nm)
   tmptbl <- csv_data[[i]]
 
   # Get only matching columns
@@ -173,12 +175,13 @@ subMat <- foreach(i = seqq, .packages = c("tidyverse", "NIMAA")) %dopar% {
 
   result <- extractSubMatrix(
     as.matrix(new_df),
-    shape = "Rectangular_row",
+    shape = "Rectangular_element_max",
     col.vars = "samples",
     row.vars = "Proteins"
   )
 
-  list(name = nm, result = result)
+  assign(nm, result[[1]])
+  # list(name = nm, result = result)
 }
 
 # Stop cluster after execution
