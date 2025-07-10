@@ -162,9 +162,9 @@ for(i in seqq){
   nm <- names(csv_data[i])
   cat("---------------->>  prot csv file: ", nm)
   tmptbl <- csv_data[[i]]
+  peptide_cols <- grep("number_of_peptides_[AB]_", colnames(tmptbl), value = TRUE)
 
   # Get only matching columns
-  peptide_cols <- grep("number_of_peptides_[AB]_", colnames(tmptbl), value = TRUE)
 
   if (length(peptide_cols) == 0) {
     warning(paste("No peptide columns found in", nm))
@@ -172,6 +172,13 @@ for(i in seqq){
   }
 
   new_df <- tmptbl %>% select(all_of(peptide_cols))
+
+  if (grepl("stand_prot_quant_mergedmaxquant.csv",nm)){
+      for (col_i in 1:ncol(new_df)){
+        zero_ids <- which(new_df[, col_i] == 0)
+        new_df[zero_ids, col_i] <- NA
+      }
+  }
 
   result <- extractSubMatrix(
     as.matrix(new_df),
@@ -184,8 +191,28 @@ for(i in seqq){
   # list(name = nm, result = result)
 }
 
+Rect_max_prot <- tibble(dataset = c("compomics", "maxquant", "proline", "tpp"),
+                   info_lvl = "Protein",
+                   shape = "Rectangular_element_max",
+                   nestedness_rect_max = c(23.27587, 3.947907, 16.72077, 16.20169),
+                   nrow_rect_max = c(2612, 5195, 3547, 3976),
+                   ncol_rect_max = 6
+                   )
+
+non_missing_perc_vs_ttl <- NULL
+for (i in 1:4){
+  nrrow_ttl_iden <- nrow(csv_data[[i+8]])
+  non_missing_perc_vs_ttl <- c(non_missing_perc_vs_ttl,
+                              (Rect_max_prot$nrow_rect_max[i] *
+                               Rect_max_prot$ncol_rect_max[i]) / (nrrow_ttl_iden * 6))
+}
+
+Rect_max_prot <- cbind(Rect_max_prot, non_missing_perc_vs_ttl)
+
+
+Rect_max_prot$non_missing <-
 # Stop cluster after execution
-stopCluster(cl)
+# stopCluster(cl)
 
 # Combine results into a named list
 subMat <- setNames(
