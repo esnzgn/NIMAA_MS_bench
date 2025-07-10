@@ -24,6 +24,7 @@ library(NIMAA)
 library(janitor)
 library(doParallel)
 library(foreach)
+library(igraph)
 
 #----
 data_dir <- "../WOMBAT-P_Processed/ProteoBenchDDA/0.9.11/"
@@ -195,7 +196,7 @@ Rect_max_prot <- tibble(dataset = c("compomics", "maxquant", "proline", "tpp"),
                    info_lvl = "Protein",
                    shape = "Rectangular_element_max",
                    nestedness_rect_max = c(23.27587, 3.947907, 16.72077, 16.20169),
-                   nrow_rect_max = c(2612, 5195, 3547, 3976),
+                   nrow_rect_max = c(2612, 4500, 3547, 3976),
                    ncol_rect_max = 6
                    )
 
@@ -209,32 +210,72 @@ for (i in 1:4){
 
 Rect_max_prot <- cbind(Rect_max_prot, non_missing_perc_vs_ttl)
 
+relative_compl <- NULL
+intial_nrows <- NULL
+for(i in seqq){
+  nm <- names(csv_data[i])
+  cat("---------------->>  prot csv file: ", nm)
+  tmptbl <- csv_data[[i]]
+  peptide_cols <- grep("number_of_peptides_[AB]_", colnames(tmptbl), value = TRUE)
 
-Rect_max_prot$non_missing <-
-# Stop cluster after execution
-# stopCluster(cl)
+  # Get only matching columns
 
-# Combine results into a named list
-subMat <- setNames(
-  lapply(subMat, function(x) x$result),
-  sapply(subMat, function(x) x$name)
-)
+  if (length(peptide_cols) == 0) {
+    warning(paste("No peptide columns found in", nm))
+    return(NULL)
+  }
 
-for (i in seq_along(subMat))
-  tmp <- as.matrix(subMat[[i]])
-cls1 <- findCluster(tmp,
-                    part = 1,
-                    method = "all", # all available clustering methods
-                    normalization = TRUE, # normalize the input matrix
-                    rm_weak_edges = TRUE, # remove the weak edges in graph
-                    rm_method = 'delete', # delete the weak edges instead of lowering their weights to 0.
-                    threshold = 'median', # Use median of edges' weights as threshold
-                    set_remaining_to_1 = TRUE, # set the weights of remaining edges to 1
-)
+  new_df <- tmptbl %>% select(all_of(peptide_cols))
+
+  if (grepl("stand_prot_quant_mergedmaxquant.csv",nm)){
+    for (col_i in 1:ncol(new_df)){
+      zero_ids <- which(new_df[, col_i] == 0)
+      new_df[zero_ids, col_i] <- NA
+    }
+  }
+
+  tmp_nm <- sum(is.na(new_df)) / (nrow(new_df)[1] * ncol(new_df)[1])
+
+  relative_compl <- c(relative_compl, (1 - tmp_nm))
+  intial_nrows <- c(intial_nrows, nrow(new_df))
+}
+
+Rect_max_prot$rel_non_missing <- relative_compl
+Rect_max_prot$intial_nrow <- intial_nrows
+seqq_sub_mat <- ls(pattern = "stand_prot_quant_")
+
+# for(i in seqq){
+#   nm <- names(csv_data[i])
+#   tmptbl <- csv_data[[i]] %>%
+#     data_frame()
+#   peptide_cols <- grep("number_of_peptides_[AB]_", colnames(tmptbl), value = TRUE)
+#
+#
+#   # Get only matching columns
+#
+#   if (length(peptide_cols) == 0) {
+#     warning(paste("No peptide columns found in", nm))
+#     return(NULL)
+#   }
+#
+#   cat("---------------->>  prot csv file: ", nm, " --- dim:  ",dim((tmptbl[, peptide_cols])), " \n")
+#
+#   bin_tmptbl <- ifelse(is.na((tmptbl[, peptide_cols])), yes = 0, no = 1)
+#
+#   # calling a func to cal the clustering
+#   tmp <- hclust(bin_tmptbl, method = "ward.D2")
+#
+#   # sum of the no of clusters to be added to the last col of the rect_max featur
+#
+# }
+
+# 4 mansucript
+## adding the vis of rectmax rowvis and table of whiteboard
+library(ggpubr)
+library(dplyr)
 
 
-
-
+## adding the text for those above
 
 
 
