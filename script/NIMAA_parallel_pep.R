@@ -274,6 +274,23 @@ seqq_sub_mat <- ls(pattern = "stand_prot_quant_")
 library(ggpubr)
 library(dplyr)
 
+Rect_max_prot_clean <- Rect_max_prot %>%
+  mutate(across(where(is.numeric), ~ round(.x, 3))) %>%
+  rename_with(~ gsub("_", " ", .x))  # Replace underscores with spaces for cleaner labels
+
+Rect_max_prot_clean
+p_table <- ggtexttable(Rect_max_prot_clean,
+                       rows = NULL,  # remove row numbers
+                       theme = ttheme("light"))  # or try "mOrange", "classic", "minimal"
+
+# Show table
+print(p_table)
+p_table
+# Save as image (e.g., PNG for publication)
+ggsave("Rectangular_Protein_Table.png", p_table, width = 1500, height = 500, units = "px", dpi = 300)
+
+# Or as PDF
+ggsave("Rectangular_Protein_Table.pdf", p_table, width = 10, height = 4)
 
 ## adding the text for those above
 
