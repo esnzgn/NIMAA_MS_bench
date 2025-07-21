@@ -94,8 +94,6 @@ inc_matrix <- createIncidenceMatrix(
 plotIncMatrix(inc_matrix)
 
 
-
-
 # Compare missingness structure
 missing_summary <- map_df(nimaa_analysis, function(res) {
   m <- res$inc$matrix
