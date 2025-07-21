@@ -107,3 +107,18 @@ missing_summary <- map_df(nimaa_analysis, function(res) {
 
 print(missing_summary)
 
+# ----> doing this part again coz dont want to rerunn whole procedure while editing NIMAA manuscript
+# Compare missingness structure
+missing_summary <- data.frame("Dataset Name" = c("CompOmics", "MaxQuant", "Proline", "TPP"),
+                              "Dataset Type" =  c("Protein", "Protein", "Protein", "Protein"),
+                              "Shape argumant" = c("Rectangular_element_max", "Rectangular_element_max", "Rectangular_element_max", "Rectangular_element_max"),
+                              "Nestedness" = c(23.276, 3.948, 16.721, 162.2),
+                              "Number of Rows" = 6,
+                              "Non missing % vs total dataset size" = c(0.446, 0.866, 0.710, 0723),
+                              "Rlative non missing" = c(0.671, 0.985, 0.882, 0.895),
+                              "No of rows in intial dataset" = c(5862, 5195, 4999, 5503))
+missing_summary %>%
+  tibble() %>%
+    View()
+
+print(missing_summary)
