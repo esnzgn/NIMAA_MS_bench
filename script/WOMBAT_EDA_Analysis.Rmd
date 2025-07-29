@@ -14,6 +14,10 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 ```{r}
 rm(list = ls())
 
+# install.packages("remotes")
+# remotes::install_github("VoisinneG/queryup")
+library(queryup)
+library(httr)
 library(jsonlite)
 library(readr)
 library(purrr)
@@ -170,7 +174,13 @@ library(NIMAA)
 # extract submatrices with non-missing values
 # sub_matrices <- extractSubMatrix(beatAML_incidence_matrix, col.vars = "patient_id",
 #  row.vars = "inhibitor")
-seqq = (grep("stand_pep_quant_",names(csv_data)))
+seqq = (grep("stand_prot_quant_",names(csv_data)))
+source("extra fucs.R")
+# 
+# # Example test
+# test_ids <- c("P22682", "P47941", "Q9H2L4")
+# get_uniprot_organisms(test_ids)
+result_organism <- list(NULL)
 
 for (i in seqq){
   print(i)
@@ -187,10 +197,19 @@ for (i in seqq){
   print(dim(read4_nimaa))
   print(head(read4_nimaa))
   print(rownames(read4_nimaa)[1:10])
+  # origanism
+  # Build and run the query
+  #  usage with my read4_nimaa rownames
+  uniprot_ids <- as.character(rownames(read4_nimaa))
+  
   cat("--------> done: ", nm, paste(rep("-------",3), collapse = ""), "\n")
 }
+
+result_organism <- get_uniprot_organisms(uniprot_ids, batch_size = 100)
 ```
+
 ```{r}
+
 subMat_bench = NULL
 for (i in seqq){
   tmptbl = NULL
