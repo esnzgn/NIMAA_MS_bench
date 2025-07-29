@@ -180,7 +180,6 @@ source("extra fucs.R")
 # # Example test
 # test_ids <- c("P22682", "P47941", "Q9H2L4")
 # get_uniprot_organisms(test_ids)
-result_organism <- list(NULL)
 
 for (i in seqq){
   print(i)
@@ -200,12 +199,13 @@ for (i in seqq){
   # origanism
   # Build and run the query
   #  usage with my read4_nimaa rownames
-  uniprot_ids <- as.character(rownames(read4_nimaa))
+  uniprot_ids <- c(uniprot_ids, as.character(rownames(read4_nimaa)))
   
   cat("--------> done: ", nm, paste(rep("-------",3), collapse = ""), "\n")
 }
-
-result_organism <- get_uniprot_organisms(uniprot_ids, batch_size = 100)
+uniprot_ids <- uniprot_ids %>%
+  unique()
+result_organism <- get_uniprot_organisms(uniprot_ids, batch_size = 500)
 ```
 
 ```{r}
