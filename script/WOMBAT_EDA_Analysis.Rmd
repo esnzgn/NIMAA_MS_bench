@@ -207,17 +207,8 @@ uniprot_ids <- uniprot_ids %>%
   unique()
 result_organism_1_1000 <- get_uniprot_organisms(uniprot_ids[1:1000], batch_size = 500)
 result_organism_1001_3000 <- get_uniprot_organisms(uniprot_ids[1001:3000], batch_size = 500)
-result_organism_1001_3000 <- get_uniprot_organisms(uniprot_ids[3001:5000], batch_size = 500)
-
-read4_nimaa <- df_4_NIMAA(tmptbl, "protein_group", T, c("peptides_A", "peptides_B"))
-  cat("------------->>>>>>>>>>>>.  ",class(read4_nimaa))
-  subMat <- NULL
-  # extract submatrices with non-missing values
-  cat("--------> dataset name: ", nm, "-------> iteration: ", i, "\n")
-  matrixxx <- as.matrix(read4_nimaa[1:500, ])
-  rownames(matrixxx) <- 1:500
-  colnames(matrixxx) <- 1:6
-  subMat <- extractSubMatrix(matrixxx, col.vars = "samples", row.vars = "peptides")
+result_organism_3001_4000 <- get_uniprot_organisms(uniprot_ids[3001:4000], batch_size = 500)
+result_organism_4001_5000 <- get_uniprot_organisms(uniprot_ids[4001:5000], batch_size = 500)
 ```
 
 ```{r}
@@ -231,7 +222,15 @@ for (i in seqq){
   tmptbl <- csv_data[[i]]
   
   # read4_nimaa <- df_4_NIMAA(not_ready_df,"peptide", c("abundance_A", "abundance_B"))
-  
+  read4_nimaa <- df_4_NIMAA(tmptbl, "protein_group", T, c("peptides_A", "peptides_B"))
+  cat("------------->>>>>>>>>>>>.  ",class(read4_nimaa))
+  subMat <- NULL
+  # extract submatrices with non-missing values
+  cat("--------> dataset name: ", nm, "-------> iteration: ", i, "\n")
+  matrixxx <- as.matrix(read4_nimaa[1:500, ])
+  rownames(matrixxx) <- 1:500
+  colnames(matrixxx) <- 1:6
+  subMat <- extractSubMatrix(matrixxx, col.vars = "samples", row.vars = "peptides")
   
   # load part of the beatAML data
 beatAML_data <- NIMAA::beatAML[1:10000,]
