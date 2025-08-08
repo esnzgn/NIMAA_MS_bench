@@ -180,6 +180,7 @@ source("extra fucs.R")
 # # Example test
 # test_ids <- c("P22682", "P47941", "Q9H2L4")
 # get_uniprot_organisms(test_ids)
+uniprot_ids <- NULL
 
 for (i in seqq){
   print(i)
@@ -203,6 +204,7 @@ for (i in seqq){
   
   cat("--------> done: ", nm, paste(rep("-------",3), collapse = ""), "\n")
 }
+
 uniprot_ids <- uniprot_ids %>%
   unique()
 result_organism_1_1000 <- get_uniprot_organisms(uniprot_ids[1:1000], batch_size = 500)
@@ -210,7 +212,15 @@ result_organism_1001_3000 <- get_uniprot_organisms(uniprot_ids[1001:3000], batch
 result_organism_3001_4000 <- get_uniprot_organisms(uniprot_ids[3001:4000], batch_size = 500)
 result_organism_4001_5000 <- get_uniprot_organisms(uniprot_ids[4001:5000], batch_size = 500)
 result_organism_5001_6000 <- get_uniprot_organisms(uniprot_ids[5001:6000], batch_size = 500)
-result_organism_6001_end <- get_uniprot_organisms(uniprot_ids[6001:(length(uniprot_ids))], batch_size = 500)
+result_organism_6001_6449 <- get_uniprot_organisms(uniprot_ids[6001:6449])
+result_organism_6451_6743 <- get_uniprot_organisms(uniprot_ids[6451:6743])
+
+result_organism <- rbind(result_organism_1_1000, result_organism_1001_3000, result_organism_3001_4000, result_organism_4001_5000, result_organism_5001_6000, result_organism_6001_6449, result_organism_6451_6743)
+
+result_organism %>% 
+  count(organism, name = "freq") %>% 
+  arrange(desc(freq))
+
 ```
 
 ```{r}
