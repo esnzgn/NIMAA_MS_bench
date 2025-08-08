@@ -207,15 +207,18 @@ for (i in seqq){
 
 uniprot_ids <- uniprot_ids %>%
   unique()
-result_organism_1_1000 <- get_uniprot_organisms(uniprot_ids[1:1000], batch_size = 500)
-result_organism_1001_3000 <- get_uniprot_organisms(uniprot_ids[1001:3000], batch_size = 500)
-result_organism_3001_4000 <- get_uniprot_organisms(uniprot_ids[3001:4000], batch_size = 500)
-result_organism_4001_5000 <- get_uniprot_organisms(uniprot_ids[4001:5000], batch_size = 500)
-result_organism_5001_6000 <- get_uniprot_organisms(uniprot_ids[5001:6000], batch_size = 500)
-result_organism_6001_6449 <- get_uniprot_organisms(uniprot_ids[6001:6449])
-result_organism_6451_6743 <- get_uniprot_organisms(uniprot_ids[6451:6743])
+# result_organism_1_1000 <- get_uniprot_organisms(uniprot_ids[1:1000], batch_size = 500)
+# result_organism_1001_3000 <- get_uniprot_organisms(uniprot_ids[1001:3000], batch_size = 500)
+# result_organism_3001_4000 <- get_uniprot_organisms(uniprot_ids[3001:4000], batch_size = 500)
+# result_organism_4001_5000 <- get_uniprot_organisms(uniprot_ids[4001:5000], batch_size = 500)
+# result_organism_5001_6000 <- get_uniprot_organisms(uniprot_ids[5001:6000], batch_size = 500)
+# result_organism_6001_6449 <- get_uniprot_organisms(uniprot_ids[6001:6449])
+# result_organism_6451_6743 <- get_uniprot_organisms(uniprot_ids[6451:6743])
 
-result_organism <- rbind(result_organism_1_1000, result_organism_1001_3000, result_organism_3001_4000, result_organism_4001_5000, result_organism_5001_6000, result_organism_6001_6449, result_organism_6451_6743)
+# result_organism <- rbind(result_organism_1_1000, result_organism_1001_3000, result_organism_3001_4000, result_organism_4001_5000, result_organism_5001_6000, result_organism_6001_6449, result_organism_6451_6743)
+
+result_organism <- get_uniprot_organisms(uniprot_ids)
+
 
 result_organism %>% 
   count(organism, name = "freq") %>% 
