@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 ## 📦 Load Required Libraries
 
 ```{r}
-rm(list = ls())
+# rm(list = ls())
 
 # install.packages("remotes")
 # remotes::install_github("VoisinneG/queryup")

@@ -1,4 +1,4 @@
-rm(list = ls())
+# rm(list = ls())
 
 # Define a path in your home directory (e.g., ~/R/4.4)
 # user_lib <- file.path(Sys.getenv("HOME"), "R", paste0("x86_64-pc-linux-gnu-library"), paste0(R.version$major, ".", R.version$minor))
@@ -141,7 +141,6 @@ df_4_NIMAA <- function(not_ready_df, column_to_row, pattern_to_columns){
 # Get the indices of interest
 seqq <- grep("stand_prot", names(csv_data))
 
-colnames()
 
 subMat = NULL
 
@@ -163,7 +162,7 @@ for(i in seqq){
   nm <- names(csv_data[i])
   cat("---------------->>  prot csv file: ", nm)
   tmptbl <- csv_data[[i]]
-  peptide_cols <- grep("number_of_peptides_[AB]_", colnames(tmptbl), value = TRUE)
+  peptide_cols <-  ("number_of_peptides_[AB]_", colnames(tmptbl), value = TRUE)
 
   # Get only matching columns
 
