@@ -219,7 +219,6 @@ uniprot_ids <- uniprot_ids %>%
 
 result_organism <- get_uniprot_organisms(uniprot_ids)
 
-
 result_organism %>% 
   count(organism, name = "freq") %>% 
   arrange(desc(freq))
