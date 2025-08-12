@@ -266,12 +266,18 @@ for (i in seqq[2:4]){
 
   # 5) Save with dynamic height (so tall vectors are readable)
   # h <- max(4, length(org_vec) / 200)  # tweak divisor to control density
-  ggsave(paste0("./output/dropped_organisms_annotation", nm,".png"), p_droped, width = 12, height = h, dpi = 300)
+  # ggsave(paste0("./output/dropped_organisms_annotation", nm,".png"), p_droped, width = 12, height = h, dpi = 300)
+  #
+  # # Save image
+  # ggsave(paste0("./output/","organism_annotation_", nm,".png"), p, width = 2, height = 12, dpi = 300)
+  #
+  # write.csv(result$Rectangular_element_max, paste0("./output/", nm, ".csv"))
+  cat("##### non missing sub matrix ####")
+  print(table(df_anno$organisms))
 
-  # Save image
-  ggsave(paste0("./output/","organism_annotation_", nm,".png"), p, width = 2, height = 12, dpi = 300)
+  cat("##### missing remaining part ####")
+  print(table(df$organism))
 
-  write.csv(result$Rectangular_element_max, paste0("./output/", nm, ".csv"))
   cat(" --------> ", nm)
 }
 
