@@ -174,7 +174,7 @@ org_pal <- c(
 
 source("./script/extractSubMatrix_complete.R")
 
-for (i in seqq[2:4]){
+for (i in seqq){
   nm <- names(csv_data[i])
   tmptbl <- csv_data[[i]]
 
