@@ -287,6 +287,7 @@ for (i in seqq){
 # --- prep ---
 
 
+View(extractSubMatrix)
 
 
 
