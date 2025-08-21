@@ -205,19 +205,44 @@ for (i in seqq){
   cat("--------> done: ", nm, paste(rep("-------",3), collapse = ""), "\n")
 }
 
+library(dplyr)
+library(tidyr)
+
 uniprot_ids <- uniprot_ids %>%
-  unique()
-# result_organism_1_1000 <- get_uniprot_organisms(uniprot_ids[1:1000], batch_size = 500)
-# result_organism_1001_3000 <- get_uniprot_organisms(uniprot_ids[1001:3000], batch_size = 500)
-# result_organism_3001_4000 <- get_uniprot_organisms(uniprot_ids[3001:4000], batch_size = 500)
-# result_organism_4001_5000 <- get_uniprot_organisms(uniprot_ids[4001:5000], batch_size = 500)
-# result_organism_5001_6000 <- get_uniprot_organisms(uniprot_ids[5001:6000], batch_size = 500)
-# result_organism_6001_6449 <- get_uniprot_organisms(uniprot_ids[6001:6449])
-# result_organism_6451_6743 <- get_uniprot_organisms(uniprot_ids[6451:6743])
+  # Turn into tibble
+  tibble(id = .) %>%
+  # Separate by comma into rows
+  separate_rows(id, sep = ",") %>%
+  # Remove duplicates and clean spaces
+  mutate(id = trimws(id)) %>%
+  distinct() %>%
+  pull(id)
 
+uniprot_ids
+# some come with a prefix as "cont_"
+# [199] "O15143"      "P60660"      "Q9BV44"      "Q2VPK5"      "Cont_P60712" "P60709"  
+
+# result_organism_1 <- get_uniprot_organisms(uniprot_ids[1:2000], batch_size = 100)
+# result_organism_2 <- get_uniprot_organisms(uniprot_ids[2001:3220], batch_size = 100)
+# result_organism_3 <- get_uniprot_organisms(uniprot_ids[3221:3228], batch_size = 100)
+# result_organism_4 <- get_uniprot_organisms(uniprot_ids[3230:6000], batch_size = 100)
+# result_organism_5 <- get_uniprot_organisms(uniprot_ids[6001:6450], batch_size = 100)
+# result_organism_6 <- get_uniprot_organisms(uniprot_ids[6451:6483], batch_size = 100)
+# result_organism_7 <- get_uniprot_organisms(uniprot_ids[6485:6907], batch_size = 100)
+# 
+# result_organism <- rbind(result_organism_1, result_organism_2, 
+#                          result_organism_3, result_organism_4,
+#                          result_organism_5, result_organism_6,
+#                          result_organism_7)
+# uniprot_ids[3229] = "A0A0B4J2D5" , uniprot_ids[6484] = UniParc.
+# This entry is no longer annotated in UniProtKB and can be found in UniParc.
+# Reason: Deleted from Swiss-Prot
+# Since release: 2024_06/2024_06
+
+
+
+result_organism <- get_uniprot_organisms(uniprot_ids, batch_size = 100)
 # result_organism <- rbind(result_organism_1_1000, result_organism_1001_3000, result_organism_3001_4000, result_organism_4001_5000, result_organism_5001_6000, result_organism_6001_6449, result_organism_6451_6743)
-
-result_organism <- get_uniprot_organisms(uniprot_ids)
 
 result_organism %>% 
   count(organism, name = "freq") %>% 
