@@ -335,10 +335,10 @@ for (i in seqq){
   mult_ids_max_dropped <- which(grepl(",", prot_ls_dropped))
   
   idx_org <- match(prot_ls, result_organism$accession)
-  organisms <- substr(result_organism$organism[idx_org], 1, 6)
+  organisms <- result_organism$organism[idx_org]
 
   idx_org_drp <- match(prot_ls_dropped, result_organism$accession)
-  organisms_drp <- substr(result_organism$organism[idx_org_drp], 1, 6)
+  organisms_drp <- result_organism$organism[idx_org_drp]
   
     for (ids_i in seq_along(mult_ids_max)){
       curr_id <- (mult_ids_max[ids_i])
@@ -350,7 +350,10 @@ for (i in seqq){
       
     }
   
-
+  organisms <- substr(organisms, 1, 6)
+  organisms_drp <- substr(organisms_drp, 1, 6)
+  
+  
   forheat <- result$Rectangular_element_max %>%
     as.data.frame() %>%
     cbind(organisms)
