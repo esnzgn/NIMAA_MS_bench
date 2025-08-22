@@ -234,59 +234,189 @@ uniprot_ids
 #                          result_organism_3, result_organism_4,
 #                          result_organism_5, result_organism_6,
 #                          result_organism_7)
-# uniprot_ids[3229] = "A0A0B4J2D5" , uniprot_ids[6484] = UniParc.
+# uniprot_ids[3229] = "A0A0B4J2D5" , uniprot_ids[6484] = "A9Z1Z3"
 # This entry is no longer annotated in UniProtKB and can be found in UniParc.
 # Reason: Deleted from Swiss-Prot
 # Since release: 2024_06/2024_06
 
 
 
-result_organism <- get_uniprot_organisms(uniprot_ids, batch_size = 100)
-# result_organism <- rbind(result_organism_1_1000, result_organism_1001_3000, result_organism_3001_4000, result_organism_4001_5000, result_organism_5001_6000, result_organism_6001_6449, result_organism_6451_6743)
+# result_organism <- get_uniprot_organisms(uniprot_ids, batch_size = 100)
+# # result_organism <- rbind(result_organism_1_1000, result_organism_1001_3000, result_organism_3001_4000, result_organism_4001_5000, result_organism_5001_6000, result_organism_6001_6449, result_organism_6451_6743)
+# 
+# result_organism %>% 
+#   count(organism, name = "freq") %>% 
+#   arrange(desc(freq))
+# 
+# write.csv(result_organism, "../output/uniprot_organism_map.csv")
+result_organism <- read.csv("../output/uniprot_organism_map.csv", row.names = 1)
 
-result_organism %>% 
-  count(organism, name = "freq") %>% 
-  arrange(desc(freq))
-
+unkn_source <- list(contamination = "Cont_",
+                 uniParc = c("A9Z1Z3", "A0A0B4J2D5"),
+                 Multiple_ids = ","
+                )
 ```
 
 ```{r}
 
-subMat_bench = NULL
+seqq <- grep("stand_prot", names(csv_data))
+subMat = NULL
+
+# Set up the cluster
+# n_cores <- 8
+# cl <- makeCluster(n_cores)
+#
+# # Manually define the path INSIDE the cluster
+# clusterEvalQ(cl, {
+#   user_lib <- file.path(Sys.getenv("HOME"), "R", "x86_64-pc-linux-gnu-library", paste0(R.version$major, ".", R.version$minor))
+#   .libPaths(c(user_lib, .libPaths()))
+# })
+#
+# # Register the parallel backend
+# registerDoParallel(cl)
+
+# subMat <- foreach(i = seqq, .packages = c("tidyverse", "NIMAA")) %dopar% {
+idss <- data_frame(NULL)
+
+# Palette for organisms (pick 4 distinct colors)
+org_pal <- c(
+  "Homo s" = "#1f77b4",
+  "Saccha" = "#2ca02c",
+  "Escher" = "#d62728",
+  "Unknown" = "#7f7f7f"
+)
+
+source("../script/extractSubMatrix_complete.R")
+
 for (i in seqq){
-  tmptbl = NULL
-  
-  rm(nm)
   nm <- names(csv_data[i])
   tmptbl <- csv_data[[i]]
+
+  new_df <- tmptbl %>%
+    select(contains(c("number_of_peptides_A", "number_of_peptides_B")))
+
+  # if (grepl("stand_prot_quant_mergedmaxquant.csv",nm)){
+  #   for (col_i in 1:ncol(new_df)){
+  #     zero_ids <- which(new_df[, col_i] == 0)
+  #     new_df[zero_ids, col_i] <- NA
+  #   }
+  # }
+
+  result <- extractSubMatrix_complete(
+    as.matrix(new_df),
+    shape = "Rectangular_element_max",
+    col.vars = "samples",
+    row.vars = "peptides"
+  )
+
+  ids_dropped <- result$Rectangular_element_max_dropped %>%
+    as.data.frame() %>%
+    rownames() %>%
+    as.integer()
+
+  y_axis_ids <- result$Rectangular_element_max %>%
+    as.data.frame() %>%
+    colnames() %>% 
+    rev()
   
-  # read4_nimaa <- df_4_NIMAA(not_ready_df,"peptide", c("abundance_A", "abundance_B"))
-  read4_nimaa <- df_4_NIMAA(tmptbl, "protein_group", T, c("peptides_A", "peptides_B"))
-  cat("------------->>>>>>>>>>>>.  ",class(read4_nimaa))
-  subMat <- NULL
-  # extract submatrices with non-missing values
-  cat("--------> dataset name: ", nm, "-------> iteration: ", i, "\n")
-  matrixxx <- as.matrix(read4_nimaa[1:500, ])
-  rownames(matrixxx) <- 1:500
-  colnames(matrixxx) <- 1:6
-  subMat <- extractSubMatrix(matrixxx, col.vars = "samples", row.vars = "peptides")
+  # find("extractSubMatrix")
+  # body(extractSubMatrix)
+  # utils::page("extractSubMatrix")
+
+  ids <-  result$Rectangular_element_max %>%
+          as.data.frame() %>%
+          rownames() %>%
+          as.integer()
+
+  prot_ls <- tmptbl$protein_group[ids]
+  prot_ls_dropped <- tmptbl$protein_group[ids_dropped]
+
+    mult_ids_max <- !grepl(",", prot_ls)
+    mult_ids_max_dropped <- !grepl(",", prot_ls_dropped)
+  for (ids_i in result_organism){
+  }
   
-  # load part of the beatAML data
-beatAML_data <- NIMAA::beatAML[1:10000,]
-
-# convert to incidence matrix
-beatAML_incidence_matrix <- nominalAsBinet(beatAML_data)
-
-# extract submatrices with non-missing values
-sub_matrices <- extractSubMatrix(beatAML_incidence_matrix, col.vars = "patient_id",
- row.vars = "inhibitor")
-
-  subMat_bench[[nm]] <- subMat
-
-  sub_matrices_beat <- extractSubMatrix(beatAML_incidence_matrix, col.vars = "inhibitor",
- row.vars = "patient_id")
+  idx_org <- match(prot_ls, result_organism$accession)
+  organisms <- substr(result_organism$organism[idx_org], 1, 6)
   
-  cat("--------> done: ", nm, paste(rep("-------",3), collapse = ""), "\n")
+  idx_org_drp <- match(prot_ls_dropped, result_organism$accession)
+  organisms_drp <- substr(result_organism$organism[idx_org_drp], 1, 6)
+
+  forheat <- result$Rectangular_element_max %>%
+    as.data.frame() %>%
+    cbind(organisms)
+
+  org_vec <- organisms_drp
+  org_vec[is.na(org_vec)] <- "Unknown"
+  df <- data.frame(row_id = seq_along(org_vec), organism = org_vec)
+
+  # Make sure NA is labeled
+  forheat <- forheat %>%
+    mutate(organisms = ifelse(is.na(organisms), "Unknown", organisms))
+
+  # Color palette
+  org_pal <- c(
+    "Homo s" = "#1f77b4",
+    "Saccha" = "#2ca02c",
+    "Escher" = "#d62728",
+    "Unknown" = "#7f7f7f"
+  )
+
+  # Add row ID
+  df_anno <- forheat %>%
+    mutate(row_id = row_number())
+
+  # Plot non_missing part
+  p <- ggplot(df_anno, aes(x = 1, y = row_id, fill = organisms)) +
+    geom_tile() +
+    scale_fill_manual(values = org_pal, name = "Organism") +
+    theme_void() +
+    theme(
+      legend.position = "right",
+      axis.text = element_blank(),
+      axis.ticks = element_blank()
+    )
+# dropped part
+  p_droped <- ggplot(df, aes(x = 1, y = row_id, fill = organism)) +
+    geom_tile() +
+    scale_fill_manual(
+      values = org_pal,
+      breaks = c("Homo s","Escher","Saccha","Unknown"),
+      labels = c("Human","E. coli","Saccharomyces","Unknown"),
+      name = "Organism"
+    ) +
+    theme_void() +
+    theme(legend.position = "right")
+
+  # 5) Save with dynamic height (so tall vectors are readable)
+  # h <- max(4, length(org_vec) / 200)  # tweak divisor to control density
+  # ggsave(paste0("./output/dropped_organisms_annotation", nm,".png"), p_droped, width = 12, height = h, dpi = 300)
+  #
+  # # Save image
+  # ggsave(paste0("./output/","organism_annotation_", nm,".png"), p, width = 2, height = 12, dpi = 300)
+  #
+  # write.csv(result$Rectangular_element_max, paste0("./output/", nm, ".csv"))
+  
+  na_source <- !(tmptbl$protein_group %in% result_organism$accession)
+  tmptbl$protein_group[na_source]
+  for (na_i in 1:length(unkn_source)){
+    
+  }
+  
+  cat("##### non missing sub matrix ####")
+  print(table(df_anno$organisms))
+  print()
+
+  cat("##### missing remaining part ####")
+  print(table(df$organism))
+
+  cat(" --------> ", nm)
 }
+
+
+# --- prep ---
+
+
+View(extractSubMatrix)
 ```
 
