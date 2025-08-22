@@ -331,16 +331,25 @@ for (i in seqq){
   prot_ls <- tmptbl$protein_group[ids]
   prot_ls_dropped <- tmptbl$protein_group[ids_dropped]
 
-    mult_ids_max <- !grepl(",", prot_ls)
-    mult_ids_max_dropped <- !grepl(",", prot_ls_dropped)
-  for (ids_i in result_organism){
-  }
+  mult_ids_max <- which(grepl(",", prot_ls))
+  mult_ids_max_dropped <- which(grepl(",", prot_ls_dropped))
   
   idx_org <- match(prot_ls, result_organism$accession)
   organisms <- substr(result_organism$organism[idx_org], 1, 6)
-  
+
   idx_org_drp <- match(prot_ls_dropped, result_organism$accession)
   organisms_drp <- substr(result_organism$organism[idx_org_drp], 1, 6)
+  
+    for (ids_i in seq_along(mult_ids_max)){
+      curr_id <- (mult_ids_max[ids_i])
+      ids_sep <- strsplit(prot_ls[curr_id], ",") %>% 
+        unlist()
+      org_ids <- match(ids_sep, result_organism$accession)
+      feq_res <- table(result_organism$organism[org_ids])
+      names(which.max(feq_res))
+      
+    }
+  
 
   forheat <- result$Rectangular_element_max %>%
     as.data.frame() %>%
