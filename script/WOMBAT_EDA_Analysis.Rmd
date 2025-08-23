@@ -288,19 +288,19 @@ org_pal <- c(
 
 source("../script/extractSubMatrix_complete.R")
 
-for (i in seqq){
+for (i in seqq[3:4]){
   nm <- names(csv_data[i])
   tmptbl <- csv_data[[i]]
 
   new_df <- tmptbl %>%
     select(contains(c("number_of_peptides_A", "number_of_peptides_B")))
 
-  # if (grepl("stand_prot_quant_mergedmaxquant.csv",nm)){
-  #   for (col_i in 1:ncol(new_df)){
-  #     zero_ids <- which(new_df[, col_i] == 0)
-  #     new_df[zero_ids, col_i] <- NA
-  #   }
-  # }
+  if (grepl("stand_prot_quant_mergedmaxquant.csv",nm)){
+    for (col_i in 1:ncol(new_df)){
+      zero_ids <- which(new_df[, col_i] == 0)
+      new_df[zero_ids, col_i] <- NA
+    }
+  }
 
   result <- extractSubMatrix_complete(
     as.matrix(new_df),
@@ -342,44 +342,46 @@ for (i in seqq){
   
   for (ids_i in seq_along(mult_ids_max)){
     curr_id <- (mult_ids_max[ids_i])
-    ids_sep <- strsplit(prot_ls[curr_id], ",") %>% 
+    ids_sep <- strsplit(prot_ls[curr_id], ",") %>%
       unlist()
     org_ids <- match(ids_sep, result_organism$accession)
     feq_res <- table(result_organism$organism[org_ids])
-    organisms[curr_id] <- names(which.max(feq_res)) 
+    if (length(feq_res) > 0){
+    organisms[curr_id] <- names(which.max(feq_res))}
   }
-  
+
   for (ids_i in seq_along(mult_ids_max_dropped)){
     curr_id <- (mult_ids_max_dropped[ids_i])
-    ids_sep <- strsplit(prot_ls_dropped[curr_id], ",") %>% 
+    ids_sep <- strsplit(prot_ls_dropped[curr_id], ",") %>%
       unlist()
     org_ids <- match(ids_sep, result_organism$accession)
     feq_res <- table(result_organism$organism[org_ids])
-    organisms[curr_id] <- names(which.max(feq_res)) 
-  }  
+    if(length(feq_res) > 0){
+      organisms_drp[curr_id] <- names(which.max(feq_res))
+    }
+  }
   
   organisms <- substr(organisms, 1, 6)
   organisms_drp <- substr(organisms_drp, 1, 6)
-  
   
   forheat <- result$Rectangular_element_max %>%
     as.data.frame() %>%
     cbind(organisms)
 
   org_vec <- organisms_drp
-  org_vec[is.na(org_vec)] <- "Unknown"
+  org_vec[is.na(org_vec)] <- "NA"
   df <- data.frame(row_id = seq_along(org_vec), organism = org_vec)
 
   # Make sure NA is labeled
-  forheat <- forheat %>%
-    mutate(organisms = ifelse(is.na(organisms), "Unknown", organisms))
+  # forheat <- forheat %>%
+  #   mutate(organisms = ifelse(is.na(organisms), "Unknown", organisms))
 
   # Color palette
   org_pal <- c(
-    "Homo s" = "#1f77b4",
-    "Saccha" = "#2ca02c",
-    "Escher" = "#d62728",
-    "Unknown" = "#7f7f7f"
+    "Homo s" = "#4285f4",
+    "Saccha" = "#34a853",
+    "Escher" = "#fbbc05",
+    "NA" = "#EA4335"
   )
 
   # Add row ID
@@ -401,34 +403,34 @@ for (i in seqq){
     geom_tile() +
     scale_fill_manual(
       values = org_pal,
-      breaks = c("Homo s","Escher","Saccha","Unknown"),
-      labels = c("Human","E. coli","Saccharomyces","Unknown"),
-      name = "Organism"
-    ) +
+      breaks = c("Homo s","Escher","Saccha","NA"),
+      labels = c("Human","E. coli","Saccharomyces","NA"),
+      name = "Organism") +
     theme_void() +
     theme(legend.position = "right")
 
   # 5) Save with dynamic height (so tall vectors are readable)
-  # h <- max(4, length(org_vec) / 200)  # tweak divisor to control density
-  # ggsave(paste0("./output/dropped_organisms_annotation", nm,".png"), p_droped, width = 12, height = h, dpi = 300)
-  #
-  # # Save image
-  # ggsave(paste0("./output/","organism_annotation_", nm,".png"), p, width = 2, height = 12, dpi = 300)
-  #
-  # write.csv(result$Rectangular_element_max, paste0("./output/", nm, ".csv"))
+  h <- max(4, length(org_vec) / 200)  # tweak divisor to control density
+  ggsave(paste0("../output/dropped_organisms_annotation", nm,".png"), p_droped, width = 5, height = h, dpi = 300)
+
+  # Save image
+  ggsave(paste0("../output/organisms_annotation", nm,".png"), p, , width = 5, height = h, dpi = 300)
+
+  write.csv(result$Rectangular_element_max, paste0("../output/", nm, ".csv"))
   
   na_source <- !(tmptbl$protein_group %in% result_organism$accession)
-  tmptbl$protein_group[na_source]
-  for (na_i in 1:length(unkn_source)){
-    
-  }
-  
+  # tmptbl$protein_group[na_source]
+
   cat("##### non missing sub matrix ####")
   print(table(df_anno$organisms))
-  print()
 
   cat("##### missing remaining part ####")
   print(table(df$organism))
+  
+  result$Rectangular_element_max %>%
+          as.data.frame() %>%
+          colnames() %>% 
+          cat()
 
   cat(" --------> ", nm)
 }
