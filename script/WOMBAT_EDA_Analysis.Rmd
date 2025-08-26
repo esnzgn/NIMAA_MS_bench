@@ -288,7 +288,7 @@ org_pal <- c(
 
 source("../script/extractSubMatrix_complete.R")
 
-for (i in seqq[3:4]){
+for (i in seqq[-c(1,2)]){
   nm <- names(csv_data[i])
   tmptbl <- csv_data[[i]]
 
@@ -423,9 +423,11 @@ for (i in seqq[3:4]){
 
   cat("##### non missing sub matrix ####")
   print(table(df_anno$organisms))
+  cat("NAs    ---- >", length(which(is.na(organisms))))
 
   cat("##### missing remaining part ####")
   print(table(df$organism))
+  cat("NAs    ---- >", length(which(is.na(organisms_drp))))
   
   result$Rectangular_element_max %>%
           as.data.frame() %>%
@@ -440,5 +442,46 @@ for (i in seqq[3:4]){
 
 
 View(extractSubMatrix)
+```
+```{r}
+f_ls <- list.files("../output/", pattern = ".csv.csv")
+
+for (lod_i in seq_along(f_ls)){
+  tmp <- t(read.csv(paste0("../output/", f_ls[lod_i])))
+  
+  png(filename = paste0("../output/hist_", f_ls[lod_i], ".png"))
+  
+  # 1) Draw histogram (probability density instead of raw counts for overlay)
+  hist(colMeans(tmp), breaks = 1000, probability = TRUE,
+       main = paste("Histogram with Density -", f_ls[lod_i]),
+       xlab = "Sum of columns")
+  
+  # 2) Add kernel density trend line
+  lines(density(colMeans(tmp), na.rm = TRUE), col = "red", lwd = 2)
+  
+  # 3) (Optional) Add a normal curve for comparison
+  x <- colMeans(tmp)
+  curve(dnorm(x, mean = mean(x, na.rm = TRUE), sd = sd(x, na.rm = TRUE)),
+        col = "blue", lwd = 2, add = TRUE)
+  
+  legend("topright", legend = c("Density", "Normal fit"),
+         col = c("red", "blue"), lwd = 2, bty = "n")
+  
+  dev.off()
+
+}
+
+# Assume: `tmptbl` = protein quant table with peptide counts
+# and `result_organism` = mapping table with accession + organism
+
+# Example: Add UniProt IDs + organism labels
+df <- tmptbl %>%
+  mutate(
+    uniprot_id = protein_group,
+    organism = result_organism$organism[match(protein_group, result_organism$accession)]
+  ) %>%
+  # keep treatment columns + labels
+  select(uniprot_id, organism, starts_with("number_of_peptides_"))
+
 ```
 
