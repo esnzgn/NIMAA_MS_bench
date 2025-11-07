@@ -288,7 +288,7 @@ org_pal <- c(
 
 source("../script/extractSubMatrix_complete.R")
 
-for (i in seqq[-c(1,2)]){
+for (i in seqq){
   nm <- names(csv_data[i])
   tmptbl <- csv_data[[i]]
 
@@ -388,6 +388,10 @@ for (i in seqq[-c(1,2)]){
   df_anno <- forheat %>%
     mutate(row_id = row_number())
 
+  # ---- collect sequences for later tests ----
+if (!exists("org_sequences")) org_sequences <- list()
+org_sequences[[nm]] <- list(kept = df_anno$organisms, dropped = org_vec)
+  
   # Plot non_missing part
   p <- ggplot(df_anno, aes(x = 1, y = row_id, fill = organisms)) +
     geom_tile() +
@@ -436,6 +440,9 @@ for (i in seqq[-c(1,2)]){
 
   cat(" --------> ", nm)
 }
+
+
+
 
 
 # --- prep ---
