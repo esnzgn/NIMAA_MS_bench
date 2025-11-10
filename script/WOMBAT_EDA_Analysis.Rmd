@@ -530,13 +530,45 @@ results_randomness <- results_randomness |>
 # View final table
 results_randomness
 
-
-
 # --- prep ---
 
 
 View(extractSubMatrix)
 ```
+```{r}
+library(dplyr)
+library(tidyr)
+library(glue)
+library(purrr)
+
+# 1) Add BH FDR across all tests
+results_randomness_fdr <- results_randomness %>%
+  mutate(p_adj = p.adjust(p_value, method = "BH")) %>%
+  mutate(sig = case_when(
+    is.na(p_adj) ~ NA_character_,
+    p_adj < 0.001 ~ "***",
+    p_adj < 0.01  ~ "**",
+    p_adj < 0.05  ~ "*",
+    TRUE ~ "ns"
+  ))
+
+# 2) Pick the "driver" stat per (software, dataset, matrix_part) = the smallest p_adj
+driver <- results_randomness_fdr %>%
+  group_by(software, dataset, matrix_part) %>%
+  slice_min(order_by = p_adj, n = 1, with_ties = FALSE) %>%
+  ungroup() %>%
+  mutate(call = if_else(p_adj < 0.05, "non-random (clustered)", "indistinguishable from random"))
+
+# 3) Compact table you can print in the Rmd
+driver %>%
+  arrange(software, matrix_part) %>%
+  select(software, dataset, matrix_part, stat, value, p_value, p_adj, sig, call) -> driver_tbl
+
+driver_tbl
+
+```
+
+
 ```{r}
 f_ls <- list.files("../output/", pattern = ".csv.csv")
 
