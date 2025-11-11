@@ -258,7 +258,6 @@ unkn_source <- list(contamination = "Cont_",
 ```
 
 ```{r}
-
 seqq <- grep("stand_prot", names(csv_data))
 subMat = NULL
 
@@ -440,7 +439,10 @@ org_sequences[[nm]] <- list(kept = df_anno$organisms, dropped = org_vec)
 
   cat(" --------> ", nm)
 }
+```
 
+
+```{r}
 # ---------- Randomness test helpers ----------
 # Count runs (consecutive blocks) in a categorical vector
 count_runs <- function(x) {
