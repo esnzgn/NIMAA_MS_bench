@@ -1,8 +1,10 @@
 
 ---
 title: "EDA of WOMBAT-P Proteomics Data"
-output: html_document
-author: Ehsan Zangene
+author: "Ehsan Zangene"
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
