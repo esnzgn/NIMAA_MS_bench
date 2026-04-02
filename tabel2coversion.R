@@ -52,7 +52,12 @@ p <- ggplot(data_long, aes(x = Species, y = Count, fill = Type)) +
     strip.text = element_text(face = "bold"),
     plot.title = element_text(face = "bold"),
     legend.position = "top"
-  ) + scale_fill_manual(values = c("Complete" = "#4CAF50", "Missing" = "#E64B35"))
+  ) + scale_fill_manual(
+    values = c(
+      "Complete" = "#0072B2",
+      "Missing"  = "#D55E00"
+    )
+  )
 
 # Print plot
 print(p)
